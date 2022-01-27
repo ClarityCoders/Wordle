@@ -37,17 +37,19 @@ def filter_words(contains, no_letter, perfect, words):
     
     return new_words
 
-runs = 2000
+runs = 1000
 
 results = pymp.shared.array((runs,), dtype='uint8')
 final_round = pymp.shared.array((runs,), dtype='uint8')
+tested_word = pymp.shared.array((runs,), dtype='|S5')
+
 
 wordle_loaded = Wordle()
 
 with pymp.Parallel(8) as p1:
     for el in p1.range(0,runs):
-        if el % 100 == 0:
-            print(F"Current Game {el}")
+        # if el % 100 == 0:
+        #     print(F"Current Game {el}")
         wordle = copy.deepcopy(wordle_loaded)
         wordle.reset()
         word_list = get_word_list()
@@ -78,15 +80,18 @@ with pymp.Parallel(8) as p1:
             # Get our new word list
             word_list = filter_words(contains, not_in_word, perfect, word_list)
         
+        tested_word[el] = wordle.current_word
         if info['win']:
             results[el] = 1
             final_round[el] = wordle.guesses
         else:
             results[el] = 0
-            final_round[el] = 0
+            final_round[el] = 255
     
+final_round = list(filter(lambda x: x!=255,final_round))
+
 print(f"{sum(results) / runs * 100}%")
 print( sum(final_round) / len(final_round))
-save_results(results, final_round, "RemoveWords")
+save_results(results, final_round, tested_word, "RemoveWords")
 
 
