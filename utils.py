@@ -41,12 +41,12 @@ def word_score(word):
     word_score = sum(word_letter_frequencies)
     return word_score
 
-def save_results(results, final_round, file_name):
+def save_results(results, final_round, tested_word, file_name):
     with open(f'{file_name}-Results.csv', 'w') as f:
       
         # using csv.writer method from CSV package
-        for result in results:
-            f.write(f"{result}\n")
+        for i,result in enumerate(results):
+            f.write(f"{result} {str(tested_word[i])}\n")
     with open(f'{file_name}-Rounds.csv', 'w') as f:
       
         # using csv.writer method from CSV package
